@@ -1,4 +1,4 @@
-Aplikasi Billing WIfi - Project PBO-2  
+Aplikasi Billing Wifi - Project PBO-2  
 Kelompok 1 - Kelas 4C-KOM  
 
 👥 Anggota Kelompok
