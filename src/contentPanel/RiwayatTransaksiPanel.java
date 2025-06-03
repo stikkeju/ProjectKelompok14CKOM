@@ -1,4 +1,6 @@
 package contentPanel;
 
-public class RiwayatTransaksiPanel {
+import javax.swing.*;
+
+public class RiwayatTransaksiPanel extends JPanel {
 }

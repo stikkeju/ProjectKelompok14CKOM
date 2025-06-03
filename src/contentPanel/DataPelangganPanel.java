@@ -1,4 +1,6 @@
 package contentPanel;
 
-public class DataPelangganPanel {
+import javax.swing.*;
+
+public class DataPelangganPanel extends JPanel {
 }
