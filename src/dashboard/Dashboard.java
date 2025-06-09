@@ -1,4 +1,4 @@
-package dashboardPanel;
+package dashboard;
 
 import contentPanel.*;
 import javax.swing.*;
