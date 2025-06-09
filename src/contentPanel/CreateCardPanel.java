@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CreateCardPanel extends RoundedPanel {
+    private JLabel valueLabel;
     public CreateCardPanel(String title, String value, String subtitle) {
         super(20);
 
@@ -15,7 +16,7 @@ public class CreateCardPanel extends RoundedPanel {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 12));
         titleLabel.setForeground(Color.BLACK);
 
-        JLabel valueLabel = new JLabel(value);
+        valueLabel = new JLabel(value);
         valueLabel.setFont(new Font("Arial", Font.BOLD, 28));
         valueLabel.setForeground(Color.BLACK);
 
@@ -49,5 +50,11 @@ public class CreateCardPanel extends RoundedPanel {
         contentPanel.add(subtitleLabel, gbcContent);
 
         add(contentPanel, BorderLayout.CENTER);
+    }
+
+    public void updateValue(String newValue){
+        this.valueLabel.setText(newValue);
+        this.revalidate();
+        this.repaint();
     }
 }
