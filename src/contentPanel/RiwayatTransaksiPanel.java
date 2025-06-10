@@ -1,30 +1,39 @@
 package contentPanel;
 
+import database.DatabaseConnection;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Date;
 
 public class RiwayatTransaksiPanel extends JPanel {
     //deklarasi variable
     private JPanel filterPanel, dariTanggalPanel, sampaiTanggalPanel, tablePanel;
     private JLabel dariTanggalLabel, sampaiTanggalLabel, cariLabel, statusLabel;
-    private JTextField cariField, statusField;
-    private JButton filterButton;
+    private JTextField cariField;
+    private JComboBox<Integer> dariDayBox, dariMonthBox, dariYearBox, sampaiDayBox, sampaiMonthBox, sampaiYearBox;
+    private JComboBox<String> statusBox;
+    private JButton filterButton, refreshButton;
     private DefaultTableModel datatransaksiModel;
     private JTable datatransaksiTable;
 
+    private Connection connection;
     public RiwayatTransaksiPanel(){
         setLayout(new GridBagLayout());
         GridBagConstraints gbcPanel = new GridBagConstraints();
 
+        connection = DatabaseConnection.getConnection();
 
         //filterPanel pada top layout
         filterPanel = new JPanel(new GridBagLayout());
-        filterPanel.setBorder(BorderFactory.createTitledBorder("filterPanel"));
+        filterPanel.setBorder(BorderFactory.createTitledBorder("Filter"));
         GridBagConstraints gbcFilterPanel = new GridBagConstraints();
         gbcFilterPanel.insets = new Insets(5,5,5,5);
         gbcFilterPanel.fill = GridBagConstraints.BOTH;
@@ -48,9 +57,9 @@ public class RiwayatTransaksiPanel extends JPanel {
         dariTanggalPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbcDariTanggal = new GridBagConstraints();
 
-        JComboBox<Integer> dariDayBox = new JComboBox<>(days);
-        JComboBox<Integer> dariMonthBox = new JComboBox<>(months);
-        JComboBox<Integer> dariYearBox = new JComboBox<>(years);
+        dariDayBox = new JComboBox<>(days);
+        dariMonthBox = new JComboBox<>(months);
+        dariYearBox = new JComboBox<>(years);
 
         gbcDariTanggal.gridx = 0; gbcDariTanggal.weightx = 1;
         gbcDariTanggal.fill = GridBagConstraints.HORIZONTAL;
@@ -68,9 +77,9 @@ public class RiwayatTransaksiPanel extends JPanel {
         sampaiTanggalPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbcSampaitanggal = new GridBagConstraints();
 
-        JComboBox<Integer> sampaiDayBox = new JComboBox<>(days);
-        JComboBox<Integer> sampaiMonthBox = new JComboBox<>(months);
-        JComboBox<Integer> sampaiYearBox = new JComboBox<>(years);
+        sampaiDayBox = new JComboBox<>(days);
+        sampaiMonthBox = new JComboBox<>(months);
+        sampaiYearBox = new JComboBox<>(years);
 
         gbcSampaitanggal.gridx = 0; gbcSampaitanggal.weightx = 1;
         gbcSampaitanggal.fill = GridBagConstraints.HORIZONTAL;
@@ -107,6 +116,7 @@ public class RiwayatTransaksiPanel extends JPanel {
         gbcFilterPanel.gridx = 4; gbcFilterPanel.gridy = 0;
         gbcFilterPanel.weightx = 1;
         filterButton = new JButton("Terapkan Filter");
+        filterButton.addActionListener(e -> filterData());
         filterPanel.add(filterButton, gbcFilterPanel);
 
         gbcFilterPanel.gridx = 0; gbcFilterPanel.gridy = 1;
@@ -127,8 +137,14 @@ public class RiwayatTransaksiPanel extends JPanel {
         gbcFilterPanel.gridx = 3; gbcFilterPanel.gridy = 1;
         gbcFilterPanel.weightx = 1;
         String status[] = {"Semua", "Sudah Bayar", "Belum Bayar"};
-        JComboBox<String> statusBox = new JComboBox<>(status);
+        statusBox = new JComboBox<>(status);
         filterPanel.add(statusBox, gbcFilterPanel);
+
+        gbcFilterPanel.gridx = 4; gbcFilterPanel.gridy = 1;
+        gbcFilterPanel.weightx = 1;
+        refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(e -> loadDataTransaksi());
+        filterPanel.add(refreshButton, gbcFilterPanel);
 
         //panel tablePanel
         tablePanel = new JPanel(new GridBagLayout());
@@ -176,7 +192,156 @@ public class RiwayatTransaksiPanel extends JPanel {
         gbcPanel.fill = GridBagConstraints.BOTH;
         add(tablePanel, gbcPanel);
 
+        loadDataTransaksi();
     }
+
+    private void loadDataTransaksi(){
+        PreparedStatement loadState = null;
+        ResultSet resultSet = null;
+        datatransaksiModel.setRowCount(0);
+        try{
+            String loadQuery = "SELECT * FROM tb_datatransaksi";
+            loadState = connection.prepareStatement(loadQuery);
+            resultSet = loadState.executeQuery();
+            while(resultSet.next()) {
+                Object[] row = {
+                        resultSet.getString("kodetransaksi"),
+                        resultSet.getString("kodepelanggan"),
+                        resultSet.getString("nama"),
+                        resultSet.getString("paket"),
+                        resultSet.getDate("tanggal"),
+                        resultSet.getInt("biaya"),
+                        resultSet.getBoolean("status"),
+                };
+                datatransaksiModel.addRow(row);
+            }
+        } catch (SQLException e){
+            JOptionPane.showMessageDialog(this, "Gagal menampilkan data: " + e.getMessage());
+        }
+    }
+
+    private void filterData(){
+        Date dariTanggal = null;
+        Date sampaiTanggal = null;
+        String cariText = cariField.getText().trim();
+        String statusTerpilih = (String) statusBox.getSelectedItem();
+
+        try{
+            //get dariTanggal
+            int dariDay = (int) dariDayBox.getSelectedItem();
+            int dariMonth = (int) dariMonthBox.getSelectedItem() - 1; // Calendar months are 0-indexed
+            int dariYear = (int) dariYearBox.getSelectedItem();
+            Calendar dariCalendar = Calendar.getInstance();
+            dariCalendar.set(dariYear, dariMonth, dariDay, 0, 0, 0);
+            dariCalendar.set(Calendar.MILLISECOND, 0);
+            dariTanggal = dariCalendar.getTime();
+
+            //get sampaiTangal
+            int sampaiDay = (int) sampaiDayBox.getSelectedItem();
+            int sampaiMonth = (int) sampaiMonthBox.getSelectedItem() - 1;
+            int sampaiYear = (int) sampaiYearBox.getSelectedItem();
+            Calendar sampaiCalendar = Calendar.getInstance();
+            sampaiCalendar.set(sampaiYear, sampaiMonth, sampaiDay, 23, 59, 59);
+            sampaiCalendar.set(Calendar.MILLISECOND, 999);
+            sampaiTanggal = sampaiCalendar.getTime();
+
+            if (dariTanggal.after(sampaiTanggal)){
+                JOptionPane.showMessageDialog(this, "Tanggal 'Dari' tidak boleh lebih dari tanggal 'Sampai'.", "Kesalahan Input Tanggal", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, "Format tanggal tidak valid. Silakan periksa pilihan tanggal Anda.", "Kesalahan Tanggal", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            return;
+        }
+        loadDataTransaksi(dariTanggal, sampaiTanggal, cariText, statusTerpilih);
+    }
+
+    private void loadDataTransaksi(Date dariTanggal, Date sampaiTanggal, String cariText, String statusTerpilih){
+        PreparedStatement loadState = null;
+        ResultSet resultSet = null;
+        datatransaksiModel.setRowCount(0);
+        int rowCount = 0;
+
+        try{
+            StringBuilder loadQuery = new StringBuilder("SELECT kodetransaksi, kodepelanggan, nama, paket, tanggal, biaya, status FROM tb_datatransaksi");
+            boolean filterditambahkan = false;
+
+            //filter tanggal
+            if (dariTanggal != null && sampaiTanggal != null){
+                loadQuery.append(" WHERE tanggal BETWEEN ? AND ?");
+                filterditambahkan = true;
+            }
+
+            //filter cariText
+            if (cariText != null && !cariText.isEmpty()){
+                if (!filterditambahkan){
+                    loadQuery.append(" WHERE ");
+                    filterditambahkan = true;
+                } else {
+                    loadQuery.append(" AND ");
+                }
+                loadQuery.append("(kodetransaksi LIKE ? OR kodepelanggan LIKE ? OR nama LIKE ?)");
+            }
+
+            //filter status
+            if (statusTerpilih != null && !statusTerpilih.equals("Semua")) {
+                if (!filterditambahkan){
+                    loadQuery.append(" WHERE ");
+                    filterditambahkan = true;
+                } else {
+                    loadQuery.append(" AND ");
+                }
+                loadQuery.append("status = ?");
+            }
+
+            loadState = connection.prepareStatement(loadQuery.toString());
+            int parameterIndex = 1;
+
+            //Set parameter untuk tanggal
+            if (dariTanggal != null && sampaiTanggal != null){
+                loadState.setDate(parameterIndex++, new java.sql.Date(dariTanggal.getTime()));
+                loadState.setDate(parameterIndex++, new java.sql.Date(sampaiTanggal.getTime()));
+            }
+
+            //Set parameter untuk cariText
+            if (cariText != null && !cariText.isEmpty()){
+                loadState.setString(parameterIndex++, "%" + cariText + "%");
+                loadState.setString(parameterIndex++, "%" + cariText + "%");
+                loadState.setString(parameterIndex++, "%" + cariText + "%");
+            }
+
+            //Set parameter untuk statusTerpilih
+            if (statusTerpilih != null && !statusTerpilih.equals("Semua")){
+                boolean nilaiStatus = statusTerpilih.equals("Sudah Bayar");
+                loadState.setBoolean(parameterIndex++, nilaiStatus);
+            }
+
+            resultSet = loadState.executeQuery();
+            while(resultSet.next()) {
+                Object[] row = {
+                        resultSet.getString("kodetransaksi"),
+                        resultSet.getString("kodepelanggan"),
+                        resultSet.getString("nama"),
+                        resultSet.getString("paket"),
+                        resultSet.getDate("tanggal"),
+                        resultSet.getInt("biaya"),
+                        resultSet.getBoolean("status"), // Fetch as boolean
+                };
+                datatransaksiModel.addRow(row);
+                rowCount++;
+            }
+            if (rowCount > 0) {
+                JOptionPane.showMessageDialog(this, "Filter berhasil diterapkan. Ditemukan " + rowCount + " data transaksi.", "Filter Berhasil", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Filter berhasil diterapkan. Tidak ada data transaksi yang ditemukan.", "Filter Berhasil", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (SQLException e){
+            JOptionPane.showMessageDialog(this, "Gagal menampilkan data dengan filter: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
 
 
 }
