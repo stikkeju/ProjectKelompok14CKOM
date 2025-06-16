@@ -21,6 +21,7 @@ public class HomePanel extends JPanel {
     private JButton bayarButton, refreshButton, cariButton;
     private DefaultTableModel datapelangganModel;
     private JTable datapelangganTable;
+    private JScrollPane tableScroll;
     private Connection connection;
 
     public HomePanel() {
@@ -276,7 +277,7 @@ public class HomePanel extends JPanel {
             }
         };
         datapelangganTable = new JTable(datapelangganModel);
-        JScrollPane tableScroll = new JScrollPane(datapelangganTable);
+        tableScroll = new JScrollPane(datapelangganTable);
         datapelangganTable.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             protected void setValue(Object value) {
@@ -385,7 +386,9 @@ public class HomePanel extends JPanel {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error menghitung pelanggan aktif: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error menghitung pelanggan aktif: " + e.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
         }
         return String.valueOf(count);
     }
@@ -401,14 +404,19 @@ public class HomePanel extends JPanel {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error menghitung pelanggan nonaktif: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error menghitung pelanggan nonaktif: " + e.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
         }
         return String.valueOf(count);
     }
 
     private String totalTransaksiBulan(Connection connection){
         int count = 0;
-        String query = "SELECT COUNT(*) AS total_transaksi FROM tb_datatransaksi WHERE MONTH(tanggal) = MONTH(CURDATE()) AND YEAR(tanggal) = YEAR(CURDATE())";
+        String query = "SELECT COUNT(*) AS total_transaksi " +
+                "FROM tb_datatransaksi WHERE " +
+                "MONTH(tanggal) = MONTH(CURDATE()) " +
+                "AND YEAR(tanggal) = YEAR(CURDATE())";
         try {
             PreparedStatement ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
@@ -418,14 +426,18 @@ public class HomePanel extends JPanel {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error menghitung pelanggan nonaktif: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error menghitung total transaksi: " + e.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
         }
         return String.valueOf(count);
     }
 
     private String totalPendapatanBulan(Connection connection){
         String query = "SELECT SUM(biaya) AS total_biaya " +
-                "FROM tb_datapelanggan WHERE MONTH(tanggal) = MONTH(CURDATE()) AND YEAR(tanggal) = YEAR(CURDATE()) " +
+                "FROM tb_datatransaksi WHERE " +
+                "MONTH(tanggal) = MONTH(CURDATE()) AND " +
+                "YEAR(tanggal) = YEAR(CURDATE()) " +
                 "AND status = TRUE";
         try{
             PreparedStatement ps = connection.prepareStatement(query);
@@ -437,6 +449,9 @@ public class HomePanel extends JPanel {
             }
         } catch (SQLException e){
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Error menghitung total pendapatan: " + e.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
         }
         return "Rp. 0";
     }
@@ -545,11 +560,16 @@ public class HomePanel extends JPanel {
 
     private void prosesBayar() {
         if (datapelangganTable.getSelectedRow() == -1) {
-            JOptionPane.showMessageDialog(this, "Silakan pilih data pelanggan dari tabel terlebih dahulu.", "Pilih Pelanggan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Silakan pilih data pelanggan dari tabel terlebih dahulu.",
+                    "Pilih Pelanggan",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String prosesQuery = "INSERT INTO tb_datatransaksi (kodetransaksi, kodepelanggan, nama, paket, tanggal, biaya, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String prosesQuery = "INSERT INTO tb_datatransaksi " +
+                "(kodetransaksi, kodepelanggan, nama, paket, tanggal, biaya, status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         //Deklarasi variabel untuk insert
         String kodepelanggan = kodepelangganField.getText();
@@ -567,7 +587,10 @@ public class HomePanel extends JPanel {
         try {
             localDate = LocalDate.of(year, month, day);
         } catch (DateTimeException e) {
-            JOptionPane.showMessageDialog(this, "Tanggal yang dipilih tidak valid!", "Tanggal Salah", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Tanggal yang dipilih tidak valid!",
+                    "Tanggal Salah",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         Date tanggal = Date.valueOf(localDate);
@@ -590,7 +613,10 @@ public class HomePanel extends JPanel {
                 alamatField.getText().isEmpty() ||
                 telpField.getText().isEmpty() ||
                 biayaField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Data tidak lengkap! Mohon isi kembali", "Data tidak lengkap", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Data tidak lengkap! Mohon isi kembali",
+                    "Data tidak lengkap",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         } else if (datapelangganModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Tolong masukkan data terlebih dahulu!");

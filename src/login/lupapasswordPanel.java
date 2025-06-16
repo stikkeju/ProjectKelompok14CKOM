@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class lupapasswordPanel extends JPanel {
     private Login loginFrame;
     private JPanel formPanel;
-    private JLabel logoLabel, titleLabel, emailLabel, passwordbaruLabel, konfirmpasswordLabel;
+    private JLabel logoLabel, titleLabel, emailLabel, passwordbaruLabel, konfirmpasswordLabel, atauLabel, bottomLabel;
     private JTextField emailField;
     private JPasswordField passwordbaruField, konfirmpasswordField;
     private JButton resetButton, kembaliButton, keluarButton;
@@ -128,7 +128,7 @@ public class lupapasswordPanel extends JPanel {
         formPanel.add(resetButton, gbcFormPanel);
 
         //atau lable
-        JLabel atauLabel = new JLabel("atau");
+        atauLabel = new JLabel("atau");
         atauLabel.setForeground(Color.GRAY);
         gbcFormPanel.gridx = 0; gbcFormPanel.gridy = 9;
         gbcFormPanel.insets = new Insets(15, 5, 15, 5);
@@ -160,7 +160,7 @@ public class lupapasswordPanel extends JPanel {
         formPanel.add(keluarButton, gbcFormPanel);
 
         //bottomLabel
-        JLabel bottomLabel = new JLabel("Aplikasi Billing WiFi by Kelompok 1 4C-KOM");
+        bottomLabel = new JLabel("Aplikasi Billing WiFi by Kelompok 1 4C-KOM");
         bottomLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
         bottomLabel.setForeground(Color.GRAY);
 
@@ -210,6 +210,9 @@ public class lupapasswordPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Password baru dan konfirmasi password tidak cocok!");
             return;
         }
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Yakin ingin mereset password?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) return;
 
         Connection connection = null;
 

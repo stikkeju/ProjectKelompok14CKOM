@@ -20,6 +20,7 @@ public class DataPelangganPanel extends JPanel {
     private JButton tambahButton, editButton, deleteButton, cariButton, refreshButton;
     private DefaultTableModel datapelangganModel;
     private JTable datapelangganTable;
+    private JScrollPane tableScroll;
     private Connection connection;
 
     public DataPelangganPanel() {
@@ -246,7 +247,7 @@ public class DataPelangganPanel extends JPanel {
         };
 
         datapelangganTable = new JTable(datapelangganModel);
-        JScrollPane tableScroll = new JScrollPane(datapelangganTable);
+        tableScroll = new JScrollPane(datapelangganTable);
 
         //set text status table ke aktif/nonaktif
         datapelangganTable.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
@@ -371,7 +372,9 @@ public class DataPelangganPanel extends JPanel {
     }
 
     private void tambahDataPelanggan() {
-        String tambahQuery = "INSERT INTO tb_datapelanggan (kodepelanggan, nama, alamat, telp, paket, tanggal, biaya, status) VALUES (?, ?, ?, ?, ?, ?,?, ?)";
+        String tambahQuery = "INSERT INTO tb_datapelanggan " +
+                "(kodepelanggan, nama, alamat, telp, paket, tanggal, biaya, status) " +
+                "VALUES (?, ?, ?, ?, ?, ?,?, ?)";
 
         //Deklarasi variabel untuk insert
         String kodepelanggan = kodepelangganField.getText();
@@ -402,7 +405,9 @@ public class DataPelangganPanel extends JPanel {
         try {
             localDate = LocalDate.of(year, month, day);
         } catch (DateTimeException e) {
-            JOptionPane.showMessageDialog(this, "Tanggal yang dipilih tidak valid!", "Tanggal Salah", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Tanggal yang dipilih tidak valid!",
+                    "Tanggal Salah", JOptionPane.WARNING_MESSAGE);
             return;
         }
         Date tanggal = Date.valueOf(localDate);
@@ -412,10 +417,13 @@ public class DataPelangganPanel extends JPanel {
                 alamatField.getText().isEmpty() ||
                 telpField.getText().isEmpty() ||
                 biayaField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Data tidak lengkap! Mohon isi kembali", "Data tidak lengkap", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Data tidak lengkap! Mohon isi kembali",
+                    "Data tidak lengkap", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (datapelangganModel.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "Tolong masukkan data terlebih dahulu!");
+            JOptionPane.showMessageDialog(this,
+                    "Tolong masukkan data terlebih dahulu!");
             return;
         }
         try {
@@ -430,21 +438,26 @@ public class DataPelangganPanel extends JPanel {
             tambahPS.setBoolean(8, status);
 
             tambahPS.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Data berhasil ditambahkan!");
+            JOptionPane.showMessageDialog(this,
+                    "Data berhasil ditambahkan!");
             loadDataPelanggan();
             clearFormPelanggan();
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Format angka salah!:  " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Format angka salah!:  " + e.getMessage());
             clearFormPelanggan();
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Database error: " + e.getMessage());
             clearFormPelanggan();
         }
     }
 
     private void editDataPelanggan() {
-        String editdatapelangganQuery = "UPDATE tb_datapelanggan SET kodepelanggan = ?, nama = ?, alamat = ?, telp = ?, paket = ?, tanggal = ?, biaya = ?, status = ? WHERE kodepelanggan = ?";
+        String editdatapelangganQuery = "UPDATE tb_datapelanggan " +
+                "SET kodepelanggan = ?, nama = ?, alamat = ?, telp = ?, paket = ?, tanggal = ?, biaya = ?, status = ? " +
+                "WHERE kodepelanggan = ?";
         //Query untuk edit nama pada tb_datatransaksi agar tetap sama dengan tb_datapelanggan
         String editdatatransaksiQuery = "UPDATE tb_datatransaksi SET nama = ? WHERE kodepelanggan = ?";
         int selectedRow = datapelangganTable.getSelectedRow();
@@ -483,7 +496,9 @@ public class DataPelangganPanel extends JPanel {
         try {
             localDate = LocalDate.of(year, month, day);
         } catch (DateTimeException e) {
-            JOptionPane.showMessageDialog(this, "Tanggal yang dipilih tidak valid!", "Tanggal Salah", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Tanggal yang dipilih tidak valid!",
+                    "Tanggal Salah", JOptionPane.WARNING_MESSAGE);
             return;
         }
         Date tanggal = Date.valueOf(localDate);
@@ -493,10 +508,13 @@ public class DataPelangganPanel extends JPanel {
                 alamatField.getText().isEmpty() ||
                 telpField.getText().isEmpty() ||
                 biayaField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Data tidak lengkap! Mohon isi kembali", "Data tidak lengkap", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Data tidak lengkap! Mohon isi kembali",
+                    "Data tidak lengkap", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (datapelangganModel.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "Tolong masukkan data terlebih dahulu!");
+            JOptionPane.showMessageDialog(this,
+                    "Tolong masukkan data terlebih dahulu!");
             return;
         }
 
@@ -583,6 +601,9 @@ public class DataPelangganPanel extends JPanel {
             return;
         }
 
+        int confirm = JOptionPane.showConfirmDialog(this, "Yakin ingin menghapus data??", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
         //Deklarasi variabel
         String kodepelanggan = (String) datapelangganModel.getValueAt(selectedRow, 0);
         try {
@@ -595,7 +616,9 @@ public class DataPelangganPanel extends JPanel {
                 loadDataPelanggan();
                 clearFormPelanggan();
             } else{
-                JOptionPane.showMessageDialog(this, "Data tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Data tidak ditemukan!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, "Gagal menghapus data: " + e.getMessage());

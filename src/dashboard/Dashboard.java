@@ -7,12 +7,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Dashboard extends JFrame {
-    private JPanel panelSidebar, panelHeader, contentPanel;
-    private JButton firstButton, secondButton, thirdButton, fourthButton, fifthButton, logoutButton;
+    private JPanel sidebarPanel, headerPanel, contentPanel;
+    private JLabel headerLabel;
+    private JButton toggleButton, homeButton, datapelangganButton, datatransaksiButton, riwayatButton, logoutButton;
     private boolean isSidebarVisible = true;
 
     public Dashboard(){
-        setTitle("Aplikasi Kelompok 1");
+        setTitle("Aplikasi Billing WiFi - Kelompok 1 4C KOM");
         setSize(1280, 720);
         setMinimumSize(new Dimension(1280, 720));
         setLocationRelativeTo(null);
@@ -24,67 +25,67 @@ public class Dashboard extends JFrame {
         setLayout(new BorderLayout());
 
         //Header
-        panelHeader = new JPanel();
-        panelHeader.setLayout(new BorderLayout());
-        panelHeader.setBorder(BorderFactory.createCompoundBorder(
+        headerPanel = new JPanel();
+        headerPanel.setLayout(new BorderLayout());
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         //panelHeader.setBorder(BorderFactory.createTitledBorder("Header"));
-        panelHeader.setPreferredSize(new Dimension(0, 72));
+        headerPanel.setPreferredSize(new Dimension(0, 72));
 
 
-        JButton toggleButton = new JButton("☰");
+        toggleButton = new JButton("☰");
         toggleButton.addActionListener(e -> toggleSidebar());
-        panelHeader.add(toggleButton, BorderLayout.WEST);
+        headerPanel.add(toggleButton, BorderLayout.WEST);
 
-        JLabel headerLabel = new JLabel("Dashboard");
+        headerLabel = new JLabel("Dashboard");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         headerLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0,0));
-        panelHeader.add(headerLabel, BorderLayout.CENTER);
+        headerPanel.add(headerLabel, BorderLayout.CENTER);
 
         //Sidebar
-        panelSidebar = new JPanel();
-        panelSidebar.setLayout(new BoxLayout(panelSidebar, BoxLayout.Y_AXIS));
-        panelSidebar.setBorder(BorderFactory.createCompoundBorder(
+        sidebarPanel = new JPanel();
+        sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
+        sidebarPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         //panelSidebar.setBorder(BorderFactory.createTitledBorder("Sidebar"));
-        panelSidebar.setPreferredSize(new Dimension(256,0));
+        sidebarPanel.setPreferredSize(new Dimension(256,0));
 
         //Sidebar Button
-        firstButton = new JButton("Home");
-        firstButton.addActionListener(e -> setContentPanel(new HomePanel()));
-        firstButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        firstButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, firstButton.getPreferredSize().height));
-        panelSidebar.add(firstButton);
+        homeButton = new JButton("Home");
+        homeButton.addActionListener(e -> setContentPanel(new HomePanel()));
+        homeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        homeButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, homeButton.getPreferredSize().height));
+        sidebarPanel.add(homeButton);
 
-        panelSidebar.add(Box.createVerticalStrut(5));
+        sidebarPanel.add(Box.createVerticalStrut(5));
 
-        secondButton = new JButton("Data Pelanggan");
-        secondButton.addActionListener(e -> setContentPanel(new DataPelangganPanel()));
-        secondButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        secondButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, secondButton.getPreferredSize().height));
-        panelSidebar.add(secondButton);
+        datapelangganButton = new JButton("Data Pelanggan");
+        datapelangganButton.addActionListener(e -> setContentPanel(new DataPelangganPanel()));
+        datapelangganButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        datapelangganButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, datapelangganButton.getPreferredSize().height));
+        sidebarPanel.add(datapelangganButton);
 
-        panelSidebar.add(Box.createVerticalStrut(5));
+        sidebarPanel.add(Box.createVerticalStrut(5));
 
-        thirdButton = new JButton("Data Transaksi");
-        thirdButton.addActionListener(e -> setContentPanel(new DataTransaksiPanel()));
-        thirdButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        thirdButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, thirdButton.getPreferredSize().height));
-        panelSidebar.add(thirdButton);
+        datatransaksiButton = new JButton("Data Transaksi");
+        datatransaksiButton.addActionListener(e -> setContentPanel(new DataTransaksiPanel()));
+        datatransaksiButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        datatransaksiButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, datatransaksiButton.getPreferredSize().height));
+        sidebarPanel.add(datatransaksiButton);
 
-        panelSidebar.add(Box.createVerticalStrut(5));
+        sidebarPanel.add(Box.createVerticalStrut(5));
 
-        fourthButton = new JButton("Riwayat Transaksi");
-        fourthButton.addActionListener(e -> setContentPanel(new RiwayatTransaksiPanel()));
-        fourthButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        fourthButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, fourthButton.getPreferredSize().height));
-        panelSidebar.add(fourthButton);
+        riwayatButton = new JButton("Riwayat Transaksi");
+        riwayatButton.addActionListener(e -> setContentPanel(new RiwayatTransaksiPanel()));
+        riwayatButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        riwayatButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, riwayatButton.getPreferredSize().height));
+        sidebarPanel.add(riwayatButton);
 
-        panelSidebar.add(Box.createVerticalGlue());
+        sidebarPanel.add(Box.createVerticalGlue());
 
         logoutButton = new JButton("Logout");
         logoutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -93,7 +94,7 @@ public class Dashboard extends JFrame {
             dispose();
             new Login();
         });
-        panelSidebar.add(logoutButton);
+        sidebarPanel.add(logoutButton);
 
 
         //Content
@@ -106,13 +107,13 @@ public class Dashboard extends JFrame {
         setContentPanel(new HomePanel());
 
 
-        add(panelHeader, BorderLayout.NORTH);
-        add(panelSidebar, BorderLayout.WEST);
+        add(headerPanel, BorderLayout.NORTH);
+        add(sidebarPanel, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
 
 
         setVisible(true);
-        panelSidebar.setVisible(isSidebarVisible);
+        sidebarPanel.setVisible(isSidebarVisible);
 
     }
 
@@ -126,13 +127,24 @@ public class Dashboard extends JFrame {
 
     private void toggleSidebar(){
         isSidebarVisible = !isSidebarVisible;
-        panelSidebar.setVisible(isSidebarVisible);
-        panelSidebar.revalidate();
+        sidebarPanel.setVisible(isSidebarVisible);
+        sidebarPanel.revalidate();
         repaint();
     }
 
     private void setContentPanel(JPanel newContent){
         contentPanel.removeAll();
+        String title = "Dashboard";
+        if (newContent instanceof HomePanel){
+            title = "Dashboard - Home";
+        } else if (newContent instanceof DataPelangganPanel) {
+            title = "Dashboard - Data Pelanggan";
+        } else if (newContent instanceof DataTransaksiPanel) {
+            title = "Dashboard - Data Transaksi";
+        } else if (newContent instanceof RiwayatTransaksiPanel) {
+            title = "Dashboard - Riwayat Transaksi";
+        }
+        headerLabel.setText(title);
         //contentPanel.setBorder(BorderFactory.createTitledBorder(newContent.getClass().getSimpleName()));
         contentPanel.add(newContent, BorderLayout.CENTER);
         contentPanel.revalidate();

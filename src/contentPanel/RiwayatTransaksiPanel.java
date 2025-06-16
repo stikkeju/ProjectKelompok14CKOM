@@ -121,7 +121,7 @@ public class RiwayatTransaksiPanel extends JPanel {
 
         gbcFilterPanel.gridx = 0; gbcFilterPanel.gridy = 1;
         gbcFilterPanel.weightx = 0;
-        cariLabel = new JLabel("ID/Kode/Nama");
+        cariLabel = new JLabel("Kode/Nama");
         filterPanel.add(cariLabel, gbcFilterPanel);
 
         gbcFilterPanel.gridx = 1; gbcFilterPanel.gridy = 1;
@@ -246,11 +246,15 @@ public class RiwayatTransaksiPanel extends JPanel {
             sampaiTanggal = sampaiCalendar.getTime();
 
             if (dariTanggal.after(sampaiTanggal)){
-                JOptionPane.showMessageDialog(this, "Tanggal 'Dari' tidak boleh lebih dari tanggal 'Sampai'.", "Kesalahan Input Tanggal", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Tanggal 'Dari' tidak boleh lebih dari tanggal 'Sampai'.",
+                        "Kesalahan Input Tanggal", JOptionPane.WARNING_MESSAGE);
                 return;
             }
         } catch (Exception e){
-            JOptionPane.showMessageDialog(this, "Format tanggal tidak valid. Silakan periksa pilihan tanggal Anda.", "Kesalahan Tanggal", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Format tanggal tidak valid. Silakan periksa pilihan tanggal Anda.",
+                    "Kesalahan Tanggal", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             return;
         }

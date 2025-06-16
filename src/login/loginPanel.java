@@ -16,7 +16,7 @@ import java.util.prefs.Preferences;
 public class loginPanel extends JPanel {
     private Login loginFrame;
     private JPanel formPanel;
-    private JLabel logoLabel, titleLabel, emailLabel, passwordLabel, lupaLabel;
+    private JLabel logoLabel, titleLabel, emailLabel, passwordLabel, lupaLabel, atauLabel, bottomLabel;
     private JTextField emailField;
     private JPasswordField passwordField;
     private JCheckBox simpanCheck;
@@ -161,7 +161,7 @@ public class loginPanel extends JPanel {
         formPanel.add(loginButton, gbcFormPanel);
 
         //atau lable
-        JLabel atauLabel = new JLabel("atau");
+        atauLabel = new JLabel("atau");
         atauLabel.setForeground(Color.GRAY);
         gbcFormPanel.gridx = 0; gbcFormPanel.gridy = 8;
         gbcFormPanel.insets = new Insets(15, 5, 15, 5);
@@ -191,7 +191,7 @@ public class loginPanel extends JPanel {
         formPanel.add(keluarButton, gbcFormPanel);
 
         //bottomLabel
-        JLabel bottomLabel = new JLabel("Aplikasi Billing WiFi by Kelompok 1 4C-KOM");
+        bottomLabel = new JLabel("Aplikasi Billing WiFi by Kelompok 1 4C-KOM");
         bottomLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
         bottomLabel.setForeground(Color.GRAY);
 
@@ -227,7 +227,7 @@ public class loginPanel extends JPanel {
         String password = new String(passwordField.getPassword());
 
         if (email.isEmpty() || password.isEmpty()){
-            JOptionPane.showMessageDialog(this, "Username atau Password salah! \nSilahkan Login Kembali.",
+            JOptionPane.showMessageDialog(this, "Email atau Password salah! \nSilahkan Login Kembali.",
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -258,7 +258,7 @@ public class loginPanel extends JPanel {
             }
         } catch (SQLException e){
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.toString(), "Database Error", JOptionPane.ERROR_MESSAGE);
             return;
         } finally {
             try { if (resultSet != null) resultSet.close(); } catch (SQLException ignored) {}

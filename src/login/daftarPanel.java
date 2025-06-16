@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class daftarPanel extends JPanel {
     private Login loginFrame;
     private JPanel formPanel;
-    private JLabel logoLabel, titleLabel, namaLabel, emailLabel, passwordLabel;
+    private JLabel logoLabel, titleLabel, namaLabel, emailLabel, passwordLabel, atauLabel, bottomLabel;
     private JTextField namaField, emailField;
     private JPasswordField passwordField;
     private JButton daftarButton, kembaliButton, keluarButton;
@@ -19,9 +19,9 @@ public class daftarPanel extends JPanel {
     public daftarPanel(Login loginFrame) {
         this.loginFrame = loginFrame;
         setLayout(new GridBagLayout());
-        GridBagConstraints gbcLupaPass = new GridBagConstraints();
-        gbcLupaPass.insets = new Insets(10, 10, 10, 10);
-        gbcLupaPass.fill = GridBagConstraints.BOTH;
+        GridBagConstraints gbcDaftar = new GridBagConstraints();
+        gbcDaftar.insets = new Insets(10, 10, 10, 10);
+        gbcDaftar.fill = GridBagConstraints.BOTH;
 
         formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
@@ -98,7 +98,7 @@ public class daftarPanel extends JPanel {
         formPanel.add(emailField, gbcFormPanel);
 
         //password label
-        passwordLabel = new JLabel("Konfirm Password");
+        passwordLabel = new JLabel("Password");
         passwordLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         gbcFormPanel.gridx = 0; gbcFormPanel.gridy = 6;
         formPanel.add(passwordLabel, gbcFormPanel);
@@ -128,7 +128,7 @@ public class daftarPanel extends JPanel {
         formPanel.add(daftarButton, gbcFormPanel);
 
         //atau lable
-        JLabel atauLabel = new JLabel("atau");
+        atauLabel = new JLabel("atau");
         atauLabel.setForeground(Color.GRAY);
         gbcFormPanel.gridx = 0; gbcFormPanel.gridy = 9;
         gbcFormPanel.insets = new Insets(15, 5, 15, 5);
@@ -158,7 +158,7 @@ public class daftarPanel extends JPanel {
         formPanel.add(keluarButton, gbcFormPanel);
 
         //bottomLabel
-        JLabel bottomLabel = new JLabel("Aplikasi Billing WiFi by Kelompok 1 4C-KOM");
+        bottomLabel = new JLabel("Aplikasi Billing WiFi by Kelompok 1 4C-KOM");
         bottomLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
         bottomLabel.setForeground(Color.GRAY);
 
@@ -172,10 +172,10 @@ public class daftarPanel extends JPanel {
         formPanel.add(bottomLabel, gbcFormPanel);
 
         //add form panel ke login
-        gbcLupaPass.gridx = 0; gbcLupaPass.gridy = 0;
-        gbcLupaPass.weightx = 1; gbcLupaPass.weighty = 1;
-        gbcLupaPass.fill = GridBagConstraints.BOTH;
-        add(formPanel, gbcLupaPass);
+        gbcDaftar.gridx = 0; gbcDaftar.gridy = 0;
+        gbcDaftar.weightx = 1; gbcDaftar.weighty = 1;
+        gbcDaftar.fill = GridBagConstraints.BOTH;
+        add(formPanel, gbcDaftar);
 
     }
 
