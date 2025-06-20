@@ -567,9 +567,15 @@ public class HomePanel extends JPanel {
             return;
         }
 
-        String prosesQuery = "INSERT INTO tb_datatransaksi " +
+        String insertQuery = "INSERT INTO tb_datatransaksi " +
                 "(kodetransaksi, kodepelanggan, nama, paket, tanggal, biaya, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        String updateQuery = "UPDATE tb_datapelanggan " +
+                "SET paket = ?, tanggal = ?, biaya = ?, status = true " +
+                "WHERE kodepelanggan = ?";
+
+
 
         //Deklarasi variabel untuk insert
         String kodepelanggan = kodepelangganField.getText();
@@ -624,18 +630,28 @@ public class HomePanel extends JPanel {
         }
 
         try {
-            PreparedStatement prosesPS = connection.prepareStatement(prosesQuery);
-            prosesPS.setString(1, kodeTransaksi);
-            prosesPS.setString(2, kodepelanggan);
-            prosesPS.setString(3, nama);
-            prosesPS.setString(4, paket);
-            prosesPS.setDate(5, tanggal);
-            prosesPS.setInt(6, biaya);
-            prosesPS.setBoolean(7, status);
+            PreparedStatement insertPS = connection.prepareStatement(insertQuery);
+            insertPS.setString(1, kodeTransaksi);
+            insertPS.setString(2, kodepelanggan);
+            insertPS.setString(3, nama);
+            insertPS.setString(4, paket);
+            insertPS.setDate(5, tanggal);
+            insertPS.setInt(6, biaya);
+            insertPS.setBoolean(7, status);
 
-            prosesPS.executeUpdate();
+            insertPS.executeUpdate();
+
+            if (status == true) {
+                PreparedStatement updatePS = connection.prepareStatement(updateQuery);
+                updatePS.setString(1, paket);
+                updatePS.setDate(2, tanggal);
+                updatePS.setInt(3, biaya);
+                updatePS.setString(4, kodepelanggan);
+                updatePS.executeUpdate();
+            }
             JOptionPane.showMessageDialog(this, "Data berhasil ditambahkan!");
             clearForm();
+            loadDataPelanggan();
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Format angka salah!:  " + e.getMessage());
             clearForm();

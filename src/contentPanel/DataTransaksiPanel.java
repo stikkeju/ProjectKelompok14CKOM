@@ -6,11 +6,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -23,7 +21,7 @@ public class DataTransaksiPanel extends JPanel {
     private JComboBox<String> paketBox, statusBox;
     private JComboBox<Integer> dayBox, monthBox, yearBox;
     private JTextArea invoiceArea;
-    private JButton konfirmasiButton, editButton, deleteButton, generateButton, copyButton;
+    private JButton konfirmasiButton, editButton, deleteButton, generateButton, kirimButton;
     private DefaultTableModel datatransaksiModel;
     private JTable datatransaksiTable;
     private Connection connection;
@@ -113,6 +111,9 @@ public class DataTransaksiPanel extends JPanel {
         dayBox = new JComboBox<>(days);
         monthBox = new JComboBox<>(months);
         yearBox = new JComboBox<>(years);
+        dayBox.setEnabled(false);
+        monthBox.setEnabled(false);
+        yearBox.setEnabled(false);
 
         gbcTanggal.gridx = 0; gbcTanggal.weightx = 1;
         gbcTanggal.fill = GridBagConstraints.HORIZONTAL;
@@ -149,6 +150,7 @@ public class DataTransaksiPanel extends JPanel {
         gbcFormPanel.weightx = 1;
         String statusArray[] = {"Sudah Bayar", "Belum Bayar"};
         statusBox = new JComboBox<>(statusArray);
+        statusBox.setEnabled(false);
         formPanel.add(statusBox, gbcFormPanel);
 
         leftButtonPanel = new JPanel(new GridBagLayout());
@@ -164,8 +166,8 @@ public class DataTransaksiPanel extends JPanel {
 
         gbcLeftButton.gridx = 1;
         gbcLeftButton.weightx = 0.3;
-        editButton = new JButton("Edit");
-        editButton.addActionListener(e -> editDataTransaksi());
+        editButton = new JButton("Edit Paket");
+        editButton.addActionListener(e -> editPaket());
         leftButtonPanel.add(editButton, gbcLeftButton);
 
         gbcLeftButton.gridx = 2;
@@ -324,6 +326,11 @@ public class DataTransaksiPanel extends JPanel {
         generateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int selectedRow = datatransaksiTable.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(DataTransaksiPanel.this, "Pilih data pada tabel dulu!");
+                    return;
+                }
                 String invoiceText =
                         "=== INVOICE TRANSAKSI BILLING WIFI ===\n" +
                                 "Kode Transaksi : " + kodetransaksiValueLabel.getText() + "\n" +
@@ -338,14 +345,8 @@ public class DataTransaksiPanel extends JPanel {
             }
         });
 
-        copyButton = new JButton("Copy Invoice");
-        copyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StringSelection selection = new StringSelection(invoiceArea.getText());
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-            }
-        });
+        kirimButton = new JButton("Kirim Invoice ke Pelanggan");
+        kirimButton.addActionListener(e -> kirimWhatsapp());
 
         gbcInvoice.gridx = 0; gbcInvoice.gridy = 0;
         gbcInvoice.weightx = 1; gbcInvoice.weighty = 1;
@@ -360,7 +361,7 @@ public class DataTransaksiPanel extends JPanel {
         gbcInvoice.gridx = 0; gbcInvoice.gridy = 2;
         gbcInvoice.weighty = 0;
         gbcInvoice.fill = GridBagConstraints.HORIZONTAL;
-        invoicePanel.add(copyButton, gbcInvoice);
+        invoicePanel.add(kirimButton, gbcInvoice);
 
 
         gbcRight.gridx = 0; gbcRight.gridy = 0;
@@ -449,12 +450,62 @@ public class DataTransaksiPanel extends JPanel {
         field.setBorder(UIManager.getBorder("TextField.border"));
     }
 
+    //copy button untuk kirim ke whatsapp
+    private void kirimWhatsapp() {
+        int selectedRow = datatransaksiTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih data pada tabel dulu!");
+            return;
+        }
+
+        String pesan = invoiceArea.getText();
+        if(pesan.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Pesan masih kosong, silahkan generate invoice dulu");
+            return;
+        }
+
+        String kodepelanggan = (String) datatransaksiModel.getValueAt(selectedRow, 1);
+        String telp = "";
+        String telpQuery = "SELECT telp FROM tb_datapelanggan WHERE kodepelanggan = ?";
+
+        try {
+            PreparedStatement telpPS = connection.prepareStatement(telpQuery);
+            telpPS.setString(1, kodepelanggan);
+            ResultSet resultSet = telpPS.executeQuery();
+
+            if (resultSet.next()) {
+                telp = resultSet.getString("telp").replaceAll("[^\\d]", "");
+                if (telp.startsWith("0")) {
+                    telp = "62" + telp.substring(1);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Nomor tidak ditemukan untuk kode pelanggan ini.");
+                return;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Gagal mendapatkan nomor telepon dari database");
+            return;
+        }
+
+        try{
+            //kirim ke whatsapp
+            String pesanEncoded = java.net.URLEncoder.encode(pesan, "UTF-8");
+            String whatsappURL = "https://wa.me/" + telp + "?text=" + pesanEncoded;
+            java.awt.Desktop.getDesktop().browse(new java.net.URI(whatsappURL));
+        } catch (Exception ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Gagal membuka whatsapp web");
+        }
+    }
+
+    //load tabel dengan status = false
     private void loadDataTransaksi(){
         PreparedStatement loadState = null;
         ResultSet resultSet = null;
         datatransaksiModel.setRowCount(0);
         try{
-            String loadQuery = "SELECT * FROM tb_datatransaksi";
+            String loadQuery = "SELECT * FROM tb_datatransaksi WHERE status = false";
             loadState = connection.prepareStatement(loadQuery);
             resultSet = loadState.executeQuery();
             while(resultSet.next()) {
@@ -476,9 +527,9 @@ public class DataTransaksiPanel extends JPanel {
 
     //function konfirmasiDataTransaksi
     private void konfirmasiDataTransaksi(){
-        String konfirmQuery = "UPDATE tb_datatransaksi SET status = ? WHERE kodetransaksi = ?";
+        String konfirmQuery = "UPDATE tb_datatransaksi SET status = true WHERE kodetransaksi = ?";
         String updatapelangganQuery = "UPDATE tb_datapelanggan " +
-                "SET paket = ?, tanggal = ?, biaya = ?, status = ? " +
+                "SET paket = ?, tanggal = ?, biaya = ?, status = true " +
                 "WHERE kodepelanggan = ?";
         int selectedRow = datatransaksiTable.getSelectedRow();
         if (selectedRow == -1){
@@ -487,8 +538,8 @@ public class DataTransaksiPanel extends JPanel {
         }
 
         String kodetransaksi = (String) datatransaksiModel.getValueAt(selectedRow, 0);
-        String kodepelanggan = kodepelangganField.getText();
-        String paket = (String) paketBox.getSelectedItem();
+        String kodepelanggan = (String) datatransaksiModel.getValueAt(selectedRow, 1);
+        String paket = (String) datatransaksiModel.getValueAt(selectedRow, 3);
 
         int day = (int) dayBox.getSelectedItem();
         int month = (int) monthBox.getSelectedItem();
@@ -507,14 +558,6 @@ public class DataTransaksiPanel extends JPanel {
 
         int biaya = Integer.parseInt(biayaField.getText());
 
-        String selectedStatus = (String) statusBox.getSelectedItem();
-        boolean status = false;
-        if (selectedStatus.equals("Sudah Bayar")) {
-            status = true;
-        } else if (selectedStatus.equals("Belum Bayar")) {
-            status = false;
-        }
-
         if (kodetransaksiField.getText().isEmpty() ||
                 kodepelangganField.getText().isEmpty() ||
                 namaField.getText().isEmpty() ||
@@ -526,12 +569,12 @@ public class DataTransaksiPanel extends JPanel {
         } else if (datatransaksiModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this,
                     "Tolong masukkan data terlebih dahulu!");
+            return;
         }
 
         try{
             PreparedStatement konfirmPS = connection.prepareStatement(konfirmQuery);
-            konfirmPS.setBoolean(1, status);
-            konfirmPS.setString(2, kodetransaksi);
+            konfirmPS.setString(1, kodetransaksi);
 
             int affectedRow = konfirmPS.executeUpdate();
             if (affectedRow > 0){
@@ -539,8 +582,7 @@ public class DataTransaksiPanel extends JPanel {
                 updatePS.setString(1, paket);
                 updatePS.setDate(2, tanggal);
                 updatePS.setInt(3, biaya);
-                updatePS.setBoolean(4, status);
-                updatePS.setString(5, kodepelanggan);
+                updatePS.setString(4, kodepelanggan);
 
                 int updatedPelanggan = updatePS.executeUpdate();
                 if (updatedPelanggan > 0) {
@@ -550,7 +592,6 @@ public class DataTransaksiPanel extends JPanel {
                     JOptionPane.showMessageDialog(this,
                             "Data pelanggan gagal diperbarui.");
                 }
-                editDataTransaksi();
                 loadDataTransaksi();
                 clearFormTransaksi();
             } else {
@@ -563,10 +604,10 @@ public class DataTransaksiPanel extends JPanel {
         }
     }
 
-    //function editDataTransaksi
-    private void editDataTransaksi(){
-        //SQL query untuk mengganti paket, tanggal, biaya dan status
-        String editQuery = "UPDATE tb_datatransaksi SET paket = ?, tanggal = ?, biaya = ?, status = ? WHERE kodetransaksi = ?";
+    //function edit paket pada datatransaksi
+    private void editPaket (){
+        //SQL query untuk mengganti paket
+        String editQuery = "UPDATE tb_datatransaksi SET paket = ?, biaya = ? WHERE kodetransaksi = ?";
         int selectedRow = datatransaksiTable.getSelectedRow();
         if (selectedRow == -1){
             JOptionPane.showMessageDialog(this, "Pilih data yang ingin diedit dari tabel!");
@@ -575,32 +616,9 @@ public class DataTransaksiPanel extends JPanel {
 
         //deklarasi variable
         String kodetransaksi = (String) datatransaksiModel.getValueAt(selectedRow, 0);
-        String kodepelanggan = kodepelangganField.getText();
         String paket = (String) paketBox.getSelectedItem();
 
-        int day = (int) dayBox.getSelectedItem();
-        int month = (int) monthBox.getSelectedItem();
-        int year = (int) yearBox.getSelectedItem();
-
-        LocalDate localDate;
-        try {
-            localDate = LocalDate.of(year, month, day);
-        } catch (DateTimeException e) {
-            JOptionPane.showMessageDialog(this, "Tanggal yang dipilih tidak valid!", "Tanggal Salah", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        java.sql.Date tanggal = java.sql.Date.valueOf(localDate);
-
         int biaya = Integer.parseInt(biayaField.getText());
-
-        String selectedStatus = (String) statusBox.getSelectedItem();
-        boolean status = false;
-        if (selectedStatus.equals("Sudah Bayar")) {
-            status = true;
-        } else if (selectedStatus.equals("Belum Bayar")) {
-            status = false;
-        }
-
 
         if (kodetransaksiField.getText().isEmpty() ||
                 kodepelangganField.getText().isEmpty() ||
@@ -616,10 +634,8 @@ public class DataTransaksiPanel extends JPanel {
         try{
             PreparedStatement editPS = connection.prepareStatement(editQuery);
             editPS.setString(1, paket);
-            editPS.setDate(2, tanggal);
-            editPS.setInt(3, biaya);
-            editPS.setBoolean(4, status);
-            editPS.setString(5, kodetransaksi);
+            editPS.setInt(2, biaya);
+            editPS.setString(3, kodetransaksi);
 
             int affectedRow = editPS.executeUpdate();
             if (affectedRow > 0){
@@ -629,8 +645,6 @@ public class DataTransaksiPanel extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(this, "Data gagal diperbarui.");
             }
-        } catch (NumberFormatException e){
-            JOptionPane.showMessageDialog(this, "Format angka salah: " + e.getMessage());
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, "Error saat update: " + e.getMessage());
         }

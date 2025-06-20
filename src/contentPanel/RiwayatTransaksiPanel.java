@@ -16,10 +16,10 @@ import java.util.Date;
 public class RiwayatTransaksiPanel extends JPanel {
     //deklarasi variable
     private JPanel filterPanel, dariTanggalPanel, sampaiTanggalPanel, tablePanel;
-    private JLabel dariTanggalLabel, sampaiTanggalLabel, cariLabel, statusLabel;
+    private JLabel dariTanggalLabel, sampaiTanggalLabel, cariLabel, paketLabel;
     private JTextField cariField;
     private JComboBox<Integer> dariDayBox, dariMonthBox, dariYearBox, sampaiDayBox, sampaiMonthBox, sampaiYearBox;
-    private JComboBox<String> statusBox;
+    private JComboBox<String> paketBox;
     private JButton filterButton, refreshButton;
     private DefaultTableModel datatransaksiModel;
     private JTable datatransaksiTable;
@@ -131,14 +131,14 @@ public class RiwayatTransaksiPanel extends JPanel {
 
         gbcFilterPanel.gridx = 2; gbcFilterPanel.gridy = 1;
         gbcFilterPanel.weightx = 0;
-        statusLabel = new JLabel("Status");
-        filterPanel.add(statusLabel, gbcFilterPanel);
+        paketLabel = new JLabel("Paket");
+        filterPanel.add(paketLabel, gbcFilterPanel);
 
         gbcFilterPanel.gridx = 3; gbcFilterPanel.gridy = 1;
         gbcFilterPanel.weightx = 1;
-        String status[] = {"Semua", "Sudah Bayar", "Belum Bayar"};
-        statusBox = new JComboBox<>(status);
-        filterPanel.add(statusBox, gbcFilterPanel);
+        String paket[] = {"20 Mbps", "30 Mbps", "50 Mbps", "100 Mbps"};
+        paketBox = new JComboBox<>(paket);
+        filterPanel.add(paketBox, gbcFilterPanel);
 
         gbcFilterPanel.gridx = 4; gbcFilterPanel.gridy = 1;
         gbcFilterPanel.weightx = 1;
@@ -200,7 +200,7 @@ public class RiwayatTransaksiPanel extends JPanel {
         ResultSet resultSet = null;
         datatransaksiModel.setRowCount(0);
         try{
-            String loadQuery = "SELECT * FROM tb_datatransaksi";
+            String loadQuery = "SELECT * FROM tb_datatransaksi WHERE status = TRUE";
             loadState = connection.prepareStatement(loadQuery);
             resultSet = loadState.executeQuery();
             while(resultSet.next()) {
@@ -224,7 +224,7 @@ public class RiwayatTransaksiPanel extends JPanel {
         Date dariTanggal = null;
         Date sampaiTanggal = null;
         String cariText = cariField.getText().trim();
-        String statusTerpilih = (String) statusBox.getSelectedItem();
+        String paketTerpilih = (String) paketBox.getSelectedItem();
 
         try{
             //get dariTanggal
@@ -258,10 +258,10 @@ public class RiwayatTransaksiPanel extends JPanel {
             e.printStackTrace();
             return;
         }
-        loadDataTransaksi(dariTanggal, sampaiTanggal, cariText, statusTerpilih);
+        loadDataTransaksi(dariTanggal, sampaiTanggal, cariText, paketTerpilih);
     }
 
-    private void loadDataTransaksi(Date dariTanggal, Date sampaiTanggal, String cariText, String statusTerpilih){
+    private void loadDataTransaksi(Date dariTanggal, Date sampaiTanggal, String cariText, String paketTerpilih){
         PreparedStatement loadState = null;
         ResultSet resultSet = null;
         datatransaksiModel.setRowCount(0);
@@ -289,14 +289,14 @@ public class RiwayatTransaksiPanel extends JPanel {
             }
 
             //filter status
-            if (statusTerpilih != null && !statusTerpilih.equals("Semua")) {
+            if (paketTerpilih != null && !paketTerpilih.equals("Semua")) {
                 if (!filterditambahkan){
                     loadQuery.append(" WHERE ");
                     filterditambahkan = true;
                 } else {
                     loadQuery.append(" AND ");
                 }
-                loadQuery.append("status = ?");
+                loadQuery.append("paket = ?");
             }
 
             loadState = connection.prepareStatement(loadQuery.toString());
@@ -315,10 +315,9 @@ public class RiwayatTransaksiPanel extends JPanel {
                 loadState.setString(parameterIndex++, "%" + cariText + "%");
             }
 
-            //Set parameter untuk statusTerpilih
-            if (statusTerpilih != null && !statusTerpilih.equals("Semua")){
-                boolean nilaiStatus = statusTerpilih.equals("Sudah Bayar");
-                loadState.setBoolean(parameterIndex++, nilaiStatus);
+            //Set parameter untuk paketTerpilih
+            if (paketTerpilih != null && !paketTerpilih.equals("Semua")){
+                loadState.setString(parameterIndex++, paketTerpilih);
             }
 
             resultSet = loadState.executeQuery();
